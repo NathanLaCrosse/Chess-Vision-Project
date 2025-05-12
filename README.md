@@ -84,3 +84,14 @@ the accuracy gained with this improvement:
 <img width="458" alt="convolution" src="https://github.com/user-attachments/assets/53f4650c-1267-4475-aa98-33463ebad8bc" />
 
 While there is only a slight improvement in point prediction, accurate prediction is imperative since the entire chessboard is interpolated from just four points. 
+
+## Technical Details - Data Augmentation
+When the neural network was trained, the model was quite overfit and could not function on any of the test images. To help train the model, random rotations and stretches 
+are sometimes (~70% chance to) applied to the image. A randomizied image may look like the one below. Also, it is important that the image is not made unrecognizable - it 
+must make sense that the first point from the csv file lines up with the top-left corner of the chessboard in the image (no horizontal/vertical flips).
+
+<img width="275" alt="randomization_example" src="https://github.com/user-attachments/assets/0d9aad41-12c7-498a-92e4-785b4eae2f40" />
+
+In the code, the dataset object that collects the testing data has settings regarding whether or not randomization should be performed on the incoming image. Additionally, 
+the data from the csv contains data for eight points, while only four are used in the actual project. This was because models that attempted to predict eight points 
+performed significantly worse than their four point counterparts.
