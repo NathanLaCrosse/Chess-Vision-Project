@@ -1,7 +1,14 @@
+# Chess Vision Project 
+Provide an overview here of the project.
+
+
+# Chess Vision Project - YOLO Object Detection
+Provide a description of YOLO's use in the project.
+
+
 # Chess Vision Project - Spatial Reasoning
-The main goal of this repository was to create a machine learning powered workflow that could take a photograph and create a FEN string representation of the current board 
-state that would be compatible with any chess engine. After doing some simple testing with YOLO object detection, we could reliably draw bounding boxes around each chess 
-piece in the image. However, for these bounding boxes to be useful, we needed a way to connect a position in the image to a position on the chessboard. 
+With YOLO object detection, we can reliably draw bounding boxes around each chess piece in the image. However, for these bounding boxes to be useful, we needed a way to 
+connect a position in the image to a position on the chessboard. 
 
 After some deliberation, I came up with the following algorithm. If we knew where the lines of the chessboard existed in the image, we could count how many lines we crossed 
 on the way to a given location to determine the rank and file of a position. In the following image, if we interpret the top-left corner as being (0,0) and the bottom right 
@@ -9,9 +16,9 @@ as being (7,7), then by counting the intersections, (5 horizontal, 1 vertical) w
 
 ![chess_alg_example](https://github.com/user-attachments/assets/784bc20d-4e3c-436a-bcfd-8969e820bd3b)
 
-Now for the difficult part - we need to know where the lines of the chessboard exist. Traditional straight line detecting algorithms fail with these images, due to noise 
-being added in with the inclusion of chess pieces and background objects (and often the board outline is detected too). Furthermore, this program should support images 
-taken from any angle, producing plenty of edge cases that elevate the problem's difficulty.
+Now this creates a new problem - we need to know where the lines of the chessboard exist. Traditional straight line detecting algorithms fail with these images, due to 
+noise being added in with the inclusion of chess pieces and background objects (and often the board outline is detected too). Furthermore, this program should support 
+images taken from any angle, producing plenty of edge cases that elevate the problem's difficulty.
 
 To solve these issues, we employ the use of a convolutional neural network with a UNet structure, depicted below.
 
@@ -38,7 +45,7 @@ Finally, we connect the points with lines to obtain our "virtual chessboard".
 While the result isn't perfect, if we take the bottom-middle of each bounding box around each chess piece, obtained from the YOLO model, we can create a close
 representation of the current board state.
 
-# Technical Details - Heatmaps
+## Technical Details - Heatmaps
 The raw point position data from the dataset cannot be fed into the model directly. Furthermore, since we want our result from the model to be a probability distribution of 
 where it thinks the given point should be, we'll need to do some preprocessing so that the model can have some distributions to compare with.
 
@@ -54,7 +61,7 @@ increases greatly as you approach the point. Finally, a softmax is applied to th
 As a final note, the model uses KLDivLoss as a loss function. This function is designed to work with probability distributions and essentially measures the similarity 
 between two distributions.
 
-# Technical Details - Line Intersections
+## Technical Details - Line Intersections
 In order to determine line intersections, the lines found in our virtual chessboard creation process are stored as parametric curves, which are stored as a four element
 array (delta_row, starting_row, delta_col, starting_col). The top-left corner is chosen as our point of reference, the distance of which will help us find the position
 of a piece. We create another line segment from the top-left corner to wherever out point in question is. This line segment is also stored as a parametric curve in the same
@@ -64,7 +71,7 @@ Solving for the intersections is simply solving a system of equations for where 
 intersection to be valid, the time of the intersection must be between 0 and 1, or else the two lines intersect outside of their defined region. This whole process is set 
 up as a matrix equation which is solved efficiently with NumPy. 
 
-# Technical Details - Determining Predicted Points
+## Technical Details - Determining Predicted Points
 At first glance, the predicted point of the model should be where the probability distribution is the largest - as this is where the point is most likely to be. However,
 our heatmaps outputted by the model end up being blobs and there is variance in the location of the greatest point in this blob. Take a look at the predicted heatmaps below:
 
