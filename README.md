@@ -1,0 +1,79 @@
+# Chess Vision Project - Spatial Reasoning
+The main goal of this repository was to create a machine learning powered workflow that could take a photograph and create a FEN string representation of the current board 
+state that would be compatible with any chess engine. After doing some simple testing with YOLO object detection, we could reliably draw bounding boxes around each chess 
+piece in the image. However, for these bounding boxes to be useful, we needed a way to connect a position in the image to a position on the chessboard. 
+
+After some deliberation, I came up with the following algorithm. If we knew where the lines of the chessboard existed in the image, we could count how many lines we crossed 
+on the way to a given location to determine the rank and file of a position. In the following image, if we interpret the top-left corner as being (0,0) and the bottom right 
+as being (7,7), then by counting the intersections, (5 horizontal, 1 vertical) we can determine that the white pawn is at the position (5, 1) on the board.
+
+![chess_alg_example](https://github.com/user-attachments/assets/784bc20d-4e3c-436a-bcfd-8969e820bd3b)
+
+Now for the difficult part - we need to know where the lines of the chessboard exist. Traditional straight line detecting algorithms fail with these images, due to noise 
+being added in with the inclusion of chess pieces and background objects (and often the board outline is detected too). Furthermore, this program should support images 
+taken from any angle, producing plenty of edge cases that elevate the problem's difficulty.
+
+To solve these issues, we employ the use of a convolutional neural network with a UNet structure, depicted below.
+
+<img width="344" alt="arcitecture" src="https://github.com/user-attachments/assets/7783293d-23f9-4f52-8abc-7227c65fee85" />
+
+To explain how this will find the lines, let's start with the data collected for this model. The raw data can be found at the following Kaggle link: 
+https://www.kaggle.com/datasets/nathanlacrosse/chess-vision-dataset/data. The data consists on images and pixel position data for where the corners of the chessboard are. 
+The model uses this data to predict where the corners of the chessboard are. The final layer of the model outputs four probability distributions for where that given corner 
+is, starting with the top-left corner and moving clockwise.
+
+Using this, we can obtain an image with the four corners of the chessboard overlaid on it:
+
+<img width="272" alt="four_corners" src="https://github.com/user-attachments/assets/e2964354-4c93-4ae9-97ae-d30d27701c90" />
+
+Now, we take advantage of the fact that the grid of the chessboard is evenly spaced. Note that this isn't precisely true due to the perspective's effect on the image, but 
+it gives an approximation that we can work with. Using this approximation, we interpolate around the rim of the chessboard to obtain points that we will draw lines through.
+
+<img width="274" alt="interpolated_rim" src="https://github.com/user-attachments/assets/3168de46-509d-4d94-b607-1f2a728c4c64" />
+
+Finally, we connect the points with lines to obtain our "virtual chessboard".
+
+<img width="273" alt="spat_result_1" src="https://github.com/user-attachments/assets/eb401299-07c2-4d19-ba37-380e27a6b31d" />
+
+While the result isn't perfect, if we take the bottom-middle of each bounding box around each chess piece, obtained from the YOLO model, we can create a close
+representation of the current board state.
+
+# Technical Details - Heatmaps
+The raw point position data from the dataset cannot be fed into the model directly. Furthermore, since we want our result from the model to be a probability distribution of 
+where it thinks the given point should be, we'll need to do some preprocessing so that the model can have some distributions to compare with.
+
+To create the heatmaps, we create an image that has values determined by a gaussian function centered around the position data, like so:
+
+<img width="200" alt="heatmap" src="https://github.com/user-attachments/assets/0bc5a8a7-2f9f-44b4-a749-161c63cacaad" />
+
+To make sure the model can learn given these heatmaps, we want the image to be nonzero everywhere but increase and accelerate as we get closer to the true point. This 
+presents a bit of a problem since the gaussian scales off so quickly that it becomes zero far away from the point (due to rounding error). So, the above image is not 
+actually a single gaussian - it's a linear combination of several with different spreads. This ensures the properties we want from the image: it is nonzero everywhere and 
+increases greatly as you approach the point. Finally, a softmax is applied to the image to ensure that it is truly a probability distribution.
+
+As a final note, the model uses KLDivLoss as a loss function. This function is designed to work with probability distributions and essentially measures the similarity 
+between two distributions.
+
+# Technical Details - Line Intersections
+In order to determine line intersections, the lines found in our virtual chessboard creation process are stored as parametric curves, which are stored as a four element
+array (delta_row, starting_row, delta_col, starting_col). The top-left corner is chosen as our point of reference, the distance of which will help us find the position
+of a piece. We create another line segment from the top-left corner to wherever out point in question is. This line segment is also stored as a parametric curve in the same
+format as mentioned previously.
+
+Solving for the intersections is simply solving a system of equations for where the reference line segment is equal to a chessboard line's line segment. In order for this 
+intersection to be valid, the time of the intersection must be between 0 and 1, or else the two lines intersect outside of their defined region. This whole process is set 
+up as a matrix equation which is solved efficiently with NumPy. 
+
+# Technical Details - Determining Predicted Points
+At first glance, the predicted point of the model should be where the probability distribution is the largest - as this is where the point is most likely to be. However,
+our heatmaps outputted by the model end up being blobs and there is variance in the location of the greatest point in this blob. Take a look at the predicted heatmaps below:
+
+<img width="450" alt="PredictedMasks" src="https://github.com/user-attachments/assets/80de05ed-11d8-4c33-bcc3-5228a9057253" />
+
+We can actually improve the accuracy of the point prediction if we instead decide to look for these blobs instead of just the brightest point. To do this, the image is
+convolved over with a kernel designed to look for them. Then the brightest point in the convolved image corresponds to the brightest blob. Below are two images showcasing 
+the accuracy gained with this improvement:
+
+<img width="458" alt="convolution" src="https://github.com/user-attachments/assets/53f4650c-1267-4475-aa98-33463ebad8bc" />
+
+While there is only a slight improvement in point prediction, accurate prediction is imperative since the entire chessboard is interpolated from just four points. 
