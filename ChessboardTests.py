@@ -1,12 +1,7 @@
-import numpy as np
-import cv2
 import matplotlib.pyplot as plt
-import torch
-from torch.utils.data import Dataset, DataLoader
 import Adapter as a
 import Visualizer as v
-from CornerNet import MaskData
-import tqdm
+from Spatial_Training.CornerNet import MaskData
 
 # Load up the neural network and the dataset
 corners_only = True

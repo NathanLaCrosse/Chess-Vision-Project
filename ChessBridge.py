@@ -1,8 +1,6 @@
 import numpy as np
 import Adapter as a
-import matplotlib.pyplot as plt
 import cv2
-import CornerNet
 from ultralytics import YOLO
 
 """

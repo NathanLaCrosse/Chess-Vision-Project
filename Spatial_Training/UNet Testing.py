@@ -8,7 +8,7 @@ corners = 4
 
 # Load up the dataset and neural network to test.
 dat = MaskData(training_dat=False, randomization=False)
-net_dict = torch.load('CornerNet.pt', map_location=torch.device('cpu'))
+net_dict = torch.load('../CornerNet.pt', map_location=torch.device('cpu'))
 net = CornerNet(corners_only= corners == 4)
 net.load_state_dict(net_dict)
 

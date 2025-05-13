@@ -1,7 +1,7 @@
 import Visualizer as v
 from pathlib import Path
 
-folder_dir = Path("Data/Test Images")
+folder_dir = Path("Spatial_Training/Data/Test Images")
 
 # For each file in the test images folder, predict results and display them.
 for file_dir in folder_dir.iterdir():
