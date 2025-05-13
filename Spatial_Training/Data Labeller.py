@@ -32,7 +32,7 @@ class LocationData:
             print(f'click! at {(int(event.ydata), int(event.xdata))}')
 
 
-loaded = pd.read_csv(f'Spatial_Training/Data/PointData{mode}.csv')
+loaded = pd.read_csv(f'Data/PointData{mode}.csv')
 d = loaded.to_dict()
 
 # Display the file using matplotlib to record points of interest
