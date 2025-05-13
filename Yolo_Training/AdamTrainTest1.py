@@ -3,6 +3,8 @@ import sys
 import torch
 from ultralytics import YOLO
 
+YOLO('yolo11m.pt')  # this will auto-download the official medium model (the one we are using)
+
 # Allow duplicate OpenMP libraries (use with caution)
 os.environ["KMP_DUPLICATE_LIB_OK"] = "TRUE"
 
