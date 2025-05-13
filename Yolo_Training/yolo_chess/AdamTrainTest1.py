@@ -36,7 +36,7 @@ def main():
         lr0=0.01, lrf=0.1,
         momentum=0.9,
         weight_decay=0.005,
-        project="chess_training",
+        project="Yolo_Training",
         name="yolo_chess2",
         exist_ok=True
     )

@@ -12,7 +12,7 @@ save_period: -1
 cache: false
 device: cuda
 workers: 8
-project: chess_training
+project: Yolo_Training
 name: yolo_chess2
 exist_ok: true
 pretrained: true
@@ -102,4 +102,4 @@ erasing: 0.4
 crop_fraction: 1.0
 cfg: null
 tracker: botsort.yaml
-save_dir: chess_training\yolo_chess2
+save_dir: Yolo_Training\yolo_chess2

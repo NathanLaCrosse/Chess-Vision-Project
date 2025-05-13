@@ -3,6 +3,57 @@ import Adapter as a
 import matplotlib.pyplot as plt
 import cv2
 import CornerNet
+from ultralytics import YOLO
+
+"""
+Generate a FEN string representation of a chess board from the image's file path. The current version 
+cannot distinguish between piece types - they will all be classified as pawns.
+
+Params:
+    - path: The path to the desired input image.
+    - model: The YOLO model to use to generate bounding boxes. Auto-loads if None.
+    - conf: The confidence level for the YOLO model, if it is being auto-created.
+    
+Returns:
+    - fen: A fen string representation of the current board state.
+"""
+def generate_FEN_from_image(path, model=None, conf=0.5):
+    # Read the image
+    im = cv2.imread(path)[:,:,::-1]
+
+    # Load up the YOLO model if not given
+    if model is None:
+        model = YOLO('Yolo_Training/yolo_chess/weights/best.pt')
+
+    # Get the resulting bounding box data
+    results = model.predict(source=im, conf=conf)[0]
+
+    # We need to keep track of classifications and where they are
+    names = results.names                   # dictionary of cl, label pairs
+    classifications = results.boxes.cls
+    bounding_boxes = results.boxes.xyxyn
+
+    # Get bottom-middle of each bounding box
+    ymaxes = bounding_boxes[:, 3]
+    xmids = (bounding_boxes[:, 0] + bounding_boxes[:, 2]) / 2.0
+    box_midpoints = np.concatenate((ymaxes.reshape(-1, 1), xmids.reshape(-1, 1)), axis=1)
+
+    # Get labels for each bounding box
+    cl = classifications.numpy().copy().astype(object)
+    labels = []
+    for i in range(cl.shape[0]):
+        label = names[cl[i]]
+
+        if label == 'chess_piece':
+            # Default value for now
+            labels.append('white_pawn')
+    labels = np.array(labels)
+
+    # The spatial reasoning model uses a resized image
+    spatial_reasoning_im = a.read_sanitized_image(path)
+
+    # Input into the FEN string generator
+    return convert_bounding_boxes_to_FEN(box_midpoints, labels, spatial_reasoning_im)
 
 """
 Converts bounding boxes given by a YOLO model and places them on the virtual board, generating
@@ -14,7 +65,7 @@ Params:
                      These midpoints have their location normalized - the values should be between
                      0 and 1.
     - labels: The labels corresponding to the piece type of each of the box_midpoints boxes.
-    - im: The target image, stored as an M X N X 3 array.
+    - im: The target image, stored as an 512 x 512 x 3 array. It must be resized before using this method.
     - white_to_move: True if white has the next move. True by default.
     
 Returns:
@@ -132,23 +183,3 @@ def convert_bounding_boxes_to_FEN(box_midpoints, labels, im, white_to_move = Tru
         print("WARNING - NOT ALL KINGS FOUND IN FEN STRING CONSTRUCTION")
 
     return fen
-
-# Testing code.
-dat = CornerNet.MaskData(training_dat=False, randomization=False, corners_only=True)
-boundingboxes = np.array([
-    [230, 71],
-    [170, 360],
-    [127, 390]
-])
-boundingboxes = boundingboxes / 512.0
-labels = np.array(["black_king", "white_rook", "black_bishop"])
-
-im, _ = dat[5]
-im = im.numpy()
-
-fen = convert_bounding_boxes_to_FEN(boundingboxes, labels, im, True)
-
-print(fen)
-
-plt.imshow(im)
-plt.show()

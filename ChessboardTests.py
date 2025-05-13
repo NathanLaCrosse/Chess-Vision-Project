@@ -23,5 +23,5 @@ for i in range(len(dat)):
     pois = a.determine_pois_via_convolution(pred)
     rim = a.interp_rim(pois)
 
-    v.draw_chessboard(im, rim)
+    plt.imshow(v.draw_chessboard(im, rim))
     plt.show()
