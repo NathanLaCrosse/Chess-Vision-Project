@@ -21,7 +21,7 @@ def generate_FEN_from_image(path, model=None, conf=0.5):
 
     # Load up the YOLO model if not given
     if model is None:
-        model = YOLO('Yolo_Training/yolo_chess/weights/best.pt')
+        model = YOLO('best.pt')
 
     # Get the resulting bounding box data
     results = model.predict(source=im, conf=conf)[0]

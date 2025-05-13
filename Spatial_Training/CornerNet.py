@@ -1,3 +1,5 @@
+import pathlib
+
 import numpy as np
 import cv2
 import torch
@@ -47,7 +49,7 @@ class MaskData(Dataset):
         # Determine proper path given if this is the training or test set
         fix = "Train" if training_dat else "Test"
 
-        df = pd.read_csv(f'Data/PointData{fix}.csv').to_numpy()
+        df = pd.read_csv(f'Spatial_Training/Data/PointData{fix}.csv').to_numpy()
 
         self.len = df.shape[0]
 
@@ -57,7 +59,7 @@ class MaskData(Dataset):
         for i in range(self.len):
             file_dir = str(df[i,0])
             corner_info = np.int32(df[i,1:])
-            self.im_dirs[i] = file_dir
+            self.im_dirs[i] = 'Spatial_Training/' + file_dir
 
             coef = 2
             if corners_only:
@@ -352,6 +354,3 @@ class CornerNet(nn.Module):
         x = self.softmax(x)
 
         return x
-
-    dat = MaskData(randomization=True)
-    im, mask = dat[0]

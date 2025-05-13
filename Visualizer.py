@@ -148,7 +148,7 @@ def visualize_final_results(im_path, spatial_model=None, yolo_model=None, conf=0
     if spatial_model is None:
         spatial_model = a.instantiate_unet(path="CornerNet.pt", corners_only=True)
     if yolo_model is None:
-        yolo_model = YOLO('Yolo_Training/yolo_chess/weights/best.pt')
+        yolo_model = YOLO('best.pt')
 
     spatial_im = a.read_sanitized_image(im_path)
     yolo_im = cv2.imread(im_path)[:, :, ::-1]
