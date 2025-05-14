@@ -46,7 +46,7 @@ images taken from any angle, producing plenty of edge cases that elevate the pro
 
 To solve these issues, we employ the use of a convolutional neural network with a UNet structure, depicted below.
 
-<img width="344" alt="arcitecture" src="https://github.com/user-attachments/assets/7783293d-23f9-4f52-8abc-7227c65fee85" />
+<img width="359" alt="arcitecture" src="https://github.com/user-attachments/assets/b84fb0c4-c072-4118-b138-fcf3ef2448af" />
 
 To explain how this will find the lines, let's start with the data collected for this model. The raw data can be found at the following Kaggle link: 
 https://www.kaggle.com/datasets/nathanlacrosse/chess-vision-dataset/data. The data consists on images and pixel position data for where the corners of the chessboard are. 
