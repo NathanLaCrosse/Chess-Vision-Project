@@ -1,6 +1,16 @@
 # Chess Vision Project 
-Provide an overview here of the project.
+The goal of this project is to convert a raw image file of a chess position to a FEN string (common chess notation) that could then be entered into a traditional chess engine. The end use is to expedite the process of setting up a chess position in a chess engine, mainly for those who play on physical boards and want to examine their performance in a game. Unfortunately, due to extenuating circumstances in the team and the small amounts of available data, the full implementation of this project is not yet complete. The completed workflow can identify where pieces are on the board, but not what kind of piece it is. Below are a few example results of the final project, both the good and bad:
 
+<img width="461" alt="Connections1" src="https://github.com/user-attachments/assets/4112f32e-bb48-4576-a7c5-38a123a7b2d9" />
+
+<img width="454" alt="Connections2" src="https://github.com/user-attachments/assets/edd31294-1872-429d-b87c-04ad38140644" />
+
+<img width="432" alt="actual miracle" src="https://github.com/user-attachments/assets/340d1e64-418c-4e14-8d08-ccebe84cf75b" />
+
+### A Note on FEN Strings
+The first portion of the FEN string - which is the only thing the workflow changes - encodes the current position of pieces on the board. It starts at the top left corner of the board and reads left to right. Numbers denote empty space, and the amount of empty spaces. "p" represents a black pawn, which is the current placeholder for a piece. Slash marks denote a change in row, from top to bottom.
+
+To generate these results on your own, please reference the files Fen String Testing.py and ChessBridge.py, which showcase and implement the main methods used in the workflow. The rest of this readme file is dedicated to explaining the finer details in solving the challenges of object detection and placing the pieces on the "virtual board".
 
 # Chess Vision Project - YOLO Object Detection
 YOLO - "You Only Look Once" is an object detection model that treats object detection as a single regression problem, predicting bounding boxes and class probabilities directly from the full image in one pass. YOLO models are widely used in various applications like autonomous driving, surveillance, and robotics. For this case, we will be using it to find the chess pieces on the board. 
