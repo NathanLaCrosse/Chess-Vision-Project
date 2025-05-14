@@ -20,18 +20,14 @@ Starting out, we found this online Kaggle dataset, which convinently had the bou
 <br>
 For this training we also used YOLO model 11m, which is a good middle tier of thier newest and highest model. 
 
-<br>
 Once all of that was situated, the training began.
+In this final version of the trained YOLO Object Detection, there is still room for improvement in the model's accuracy, however it is sufficient for completing the workflow.
 
-
-
-<br>
-In this final version of the trained YOLO Object Detection, there is still room for improvement in the accuraccy; however, it does work! 
 
 ![yolo example](https://github.com/user-attachments/assets/44fbcf6f-9bb8-4084-be09-c312ad958835)
 
 
-As you can see, YOLO is able to determine not only where the chess pieces are with a decent accuraccy, but also give it these very helpful bounding boxes. Once we get these bounding boxes, we can move to the next step. 
+As you can see, YOLO is able to determine not only where the chess pieces are with a decent accuracy, but also give it these very helpful bounding boxes. Once we get these bounding boxes, we can move to the next step. 
 
 
 # Chess Vision Project - Spatial Reasoning
